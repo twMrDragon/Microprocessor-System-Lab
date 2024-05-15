@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group 7 Lab 6</title>
+    <script>
+        function switch_mode() {
+            var checkbox_detect = document.getElementById("radio_detect")
+            var checkbox_no_detect = document.getElementById("radio_no_detect")
+            var label_mode_select = document.getElementById("mode_select")
+            if (checkbox_detect.checked) {
+                label_mode_select.innerText = "感測器偵測中"
+                setInterval(() => {
+                    get_and_set_adc_value()
+                }, 1000);
+            } else if (checkbox_no_detect.checked) {
+                document.location.href = "http://192.168.137.195:8080/led_control.html";
+            }
+        }
+
+        function get_and_set_adc_value() {
+            var label_adc_value = document.getElementById("adc_value")
+            fetch("http://192.168.137.195:8080/adc")
+                .then(function (response) {
+                    return response.json()
+                })
+                .then(function (data) {
+                    label_adc_value.innerText = data.adc_value
+                })
+        }
+    </script>
+</head>
+
+<body>
+    <h1>Nodejs</h1>
+    <hr>
+    <h2 id="mode_select">請選擇模式</h2>
+    <br>
+    <h2 id="adc_value"></h2>
+    <div>
+        <button onclick="switch_mode()">
+            Submit
+        </button>
+        <input id="radio_detect" type="radio" name="mode">DETECT
+        <input id="radio_no_detect" type="radio" name="mode">NO_DETECT
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(location.search)
+        if (urlParams.has("detect") && urlParams.get("detect") == "true") {
+            document.getElementById("radio_detect").checked = true;
+            switch_mode();
+        }
+    </script>
+</body>
+
+</html>

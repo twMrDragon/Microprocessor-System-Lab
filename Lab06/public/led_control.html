@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group 7 Lab 6</title>
+    <script>
+        var checkboxIds = ["checkbox1", "checkbox2", "checkbox3", "checkbox4"];
+        function switchLED() {
+            var submit_output = ""
+            var switchState = document.getElementById("radio_ON").checked ? "ON" : "OFF";
+            var selectedIndex = []
+            checkboxIds.forEach((element, index) => {
+                var checkbox = document.getElementById(element)
+                if (checkbox.checked) {
+                    submit_output += `${checkbox.value} ${switchState}\n`
+                    selectedIndex.push(index)
+                }
+            })
+            document.getElementById("switch_output").innerText = submit_output
+
+            fetch("http://192.168.137.195:8080/switchLED", {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    state: switchState,
+                    selected: selectedIndex
+                })
+            })
+        }
+    </script>
+    <script>
+        function shineLED() {
+            var times = parseInt(document.getElementById("shine_times").value)
+            document.getElementById("shine_output").innerText = times
+
+            fetch("http://192.168.137.195:8080/shineMode", {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    times: times
+                })
+            })
+        }
+    </script>
+    
+    <script>
+        function switch_mode() {
+            var checkbox_detect = document.getElementById("radio_detect")
+            if (checkbox_detect.checked) {
+                document.location.href = "http://192.168.137.195:8080?detect=true";
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <h1>Nodejs</h1>
+    <hr>
+    <h2>LED Control Panel</h2>
+    <div>
+        <input id="checkbox1" type="checkbox" value="LED1">LED1
+        <input id="checkbox2" type="checkbox" value="LED2">LED2
+    </div>
+    <div>
+        <input id="checkbox3" type="checkbox" value="LED3">LED3
+        <input id="checkbox4" type="checkbox" value="LED4">LED4
+    </div>
+    <div>
+        <input type="radio" id="radio_ON" checked="true" name="LED" value="ON">ON
+        <input type="radio" id="radio_OFF" name="LED" value="OFF">OFF
+    </div>
+    <button onclick="switchLED()">Submit</button>
+    <br>
+    <label id="switch_output"></label>
+    <hr>
+    <h2>LED Switch Frequency</h2>
+    <input type="text" id="shine_times"><br>
+    <button onclick="shineLED()">Mode_Shine</button>
+    <br>
+    <label id="shine_output"></label>
+    <hr>
+    <div>
+        <button onclick="switch_mode()">
+            Submit
+        </button>
+        <input id="radio_detect" type="radio" name="mode">DETECT
+        <input id="radio_no_detect" type="radio" name="mode" checked="true">NO_DETECT
+    </div>
+</body>
+
+</html>
