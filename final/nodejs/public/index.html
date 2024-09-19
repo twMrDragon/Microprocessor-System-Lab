@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Group 7 final</title>
+  </head>
+  <body>
+    <canvas id="myCanvas" width="50" height="50"></canvas>
+    <h1 id="myContent"></h1>
+    <hr />
+    <input id="shineLED" type="checkbox" />要不要懲罰大小姐
+    <br />
+    <textarea id="user_input"></textarea>
+    <button id="sendMessage">傳送訊息</button>
+    <br />
+    <script>
+      const btn = document.getElementById("sendMessage");
+      const user_input = document.getElementById("user_input");
+      function send_to_line() {
+        fetch("http://192.168.137.195:8080/line_notify", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            message: user_input.value,
+          }),
+        });
+      }
+
+      btn.addEventListener("click", send_to_line);
+    </script>
+    <script>
+      const checkbox = document.getElementById("shineLED");
+      fetch("http://192.168.137.195:8080/isDancing")
+        .then((response) => {
+          return response.json();
+        })
+        .then((data) => {
+          if (data) {
+            checkbox.checked = data;
+          }
+        });
+
+      function handleCheckboxChange(event) {
+        fetch("http://192.168.137.195:8080/dancing", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            isShine: event.target.checked,
+          }),
+        });
+
+        if (event.target.checked) {
+          console.log("大小姐需要被懲罰");
+        } else {
+          console.log("大小姐不需要被懲罰");
+        }
+      }
+
+      checkbox.addEventListener("change", handleCheckboxChange);
+    </script>
+    <script>
+      function updateCanvas(color) {
+        // 获取 canvas 元素
+        const canvas = document.getElementById("myCanvas");
+        const ctx = canvas.getContext("2d");
+
+        // 圆形的参数
+        const x = canvas.width / 2; // 圆心的 x 坐标
+        const y = canvas.height / 2; // 圆心的 y 坐标
+        const radius = 22; // 圆的半径
+
+        // 绘制圆形
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2, false); // x, y, radius, startAngle, endAngle, counterclockwise
+        ctx.fillStyle = color; // 圆形填充颜色
+        ctx.fill();
+        ctx.lineWidth = 2; // 圆形边框宽度
+        ctx.strokeStyle = "black"; // 圆形边框颜色
+        ctx.stroke();
+      }
+      function updateContent(new_text) {
+        const text = document.getElementById("myContent");
+        text.innerText = new_text;
+      }
+
+      setInterval(() => {
+        fetch("http://192.168.137.195:8080/get_ADC_status")
+          .then((response) => {
+            return response.json();
+          })
+          .then((data) => {
+            console.log(data);
+            updateCanvas(data ? "green" : "red");
+            updateContent(
+              data ? "有乖乖睡覺喔" : "お嬢様, it's time to go to bed"
+            );
+          });
+      }, 1000);
+    </script>
+  </body>
+</html>

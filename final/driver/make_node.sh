@@ -1,0 +1,1 @@
+mknod /dev/final c 666 0
